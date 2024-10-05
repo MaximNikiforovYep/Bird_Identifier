@@ -22,10 +22,10 @@ public class MicrophoneFragment extends Fragment {
         return binding.getRoot();
     }
 
-/*  @Override
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-    }*/
+    }
 
     @Override
     public void onDestroyView() {
