@@ -4,7 +4,6 @@
     <option name="FORCE_PUSH_PROHIBITED_PATTERNS">
       <list>
         <option value="main" />
-        <option value="master" />
       </list>
     </option>
   </component>
