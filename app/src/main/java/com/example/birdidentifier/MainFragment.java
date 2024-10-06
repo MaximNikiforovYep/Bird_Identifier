@@ -13,8 +13,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.birdidentifier.databinding.FragmentMainBinding;
 
 public class MainFragment extends Fragment {
-    FragmentMainBinding binding;
-    public MainFragment (){}
+    private FragmentMainBinding binding;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

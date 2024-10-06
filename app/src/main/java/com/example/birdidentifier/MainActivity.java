@@ -3,12 +3,15 @@ package com.example.birdidentifier;
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.OnBackPressedDispatcher;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import android.Manifest;
 import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -16,9 +19,10 @@ import com.example.birdidentifier.adapters.ViewPagerAdapter;
 import com.example.birdidentifier.databinding.ActivityMainBinding;
 
 public class MainActivity extends FragmentActivity {
-    ActivityMainBinding binding;
-    ViewPager2 viewPager;
-    ViewPagerAdapter viewPagerAdapter;
+    private static final int REQUEST_PERMISSIONS = 100;
+    private ActivityMainBinding binding;
+    private ViewPager2 viewPager;
+    private ViewPagerAdapter viewPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,10 +30,11 @@ public class MainActivity extends FragmentActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSIONS);
+
         viewPager = findViewById(R.id.viewPager);
         viewPagerAdapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(viewPagerAdapter);
-
         viewPager.setCurrentItem(1, false);
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {

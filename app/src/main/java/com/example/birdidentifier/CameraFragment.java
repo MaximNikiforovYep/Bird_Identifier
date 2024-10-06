@@ -13,7 +13,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.birdidentifier.databinding.FragmentCameraBinding;
 
 public class CameraFragment extends Fragment {
-    FragmentCameraBinding binding;
+    private FragmentCameraBinding binding;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
