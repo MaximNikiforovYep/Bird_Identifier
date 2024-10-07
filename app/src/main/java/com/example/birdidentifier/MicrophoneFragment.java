@@ -3,6 +3,8 @@ package com.example.birdidentifier;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Environment;
@@ -30,6 +32,7 @@ public class MicrophoneFragment extends Fragment {
     private FragmentMicrophoneBinding binding;
     private Context context;
     private MediaRecorder mediaRecorder;
+
     private MediaPlayer mediaPlayer;
     private String AudioSavePath;
 
@@ -40,12 +43,95 @@ public class MicrophoneFragment extends Fragment {
         context = getActivity();
         assert context != null;
         return binding.getRoot();
+
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        binding.button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+            }
+        });
+
+        binding.button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (audioRecorder != null) {
+                    audioRecorder.stop();
+                    audioRecorder.release();
+                    audioRecorder = null;
+                }
+            }
+        });
+
+        binding.button3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setDataSource(AudioSavePath);
+                    mediaPlayer.prepare();
+                    mediaPlayer.start();
+                    Toast.makeText(context, "Playing started", Toast.LENGTH_SHORT).show();
+                } catch (IOException e) {
+                    Toast.makeText(context, "Playing failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, e + "", Toast.LENGTH_SHORT).show();
+                    Log.e("Error playing", e + "");
+                }
+            }
+        });
+
+        binding.button4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mediaPlayer != null) {
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                    Toast.makeText(getActivity(), "Playing stopped", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /*
         binding.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,6 +209,8 @@ public class MicrophoneFragment extends Fragment {
                 }
             }
         });
+
+         */
     }
 
     @Override
@@ -135,5 +223,28 @@ public class MicrophoneFragment extends Fragment {
     private boolean checkPermissions() {
         int permission = ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO);
         return permission == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private class RecordAudio {
+        private AudioRecord audioRecorder = null;
+        private int bufferSize;
+        public void startRecording() {
+            bufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+
+            audioRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100,
+                    AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+
+            audioRecorder.startRecording();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    short[] audioBuffer = new short[bufferSize];
+                    while (audioRecorder.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
+                        audioRecorder.read(audioBuffer, 0, audioBuffer.length);
+                        // Здесь можно добавить код для анализа аудиопотока
+                    }
+                }
+            }).start();
+        }
     }
 }
