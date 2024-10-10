@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.example.birdidentifier.databinding.FragmentMicrophoneBinding;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -36,8 +37,18 @@ import java.io.IOException;
 public class MicrophoneFragment extends Fragment {
     private FragmentMicrophoneBinding binding;
     private Context context;
-    private MediaPlayer mediaPlayer;
     private String audioSavePath;
+    private static final int SAMPLE_RATE = 44100;
+    private static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE,
+            AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+
+    private AudioRecord audioRecord;
+    private AudioTrack audioTrack;
+    private boolean isRecording = false;
+    private boolean isPlaying = false;
+
+    private ByteArrayOutputStream audioOutputStream;
+
 
     @Nullable
     @Override
@@ -61,7 +72,7 @@ public class MicrophoneFragment extends Fragment {
             getActivity().finish();
         }
 
-        RecordAudio.setAudioSavePath(audioSavePath);
+        Log.i("Audio path", audioSavePath);
 
         return binding.getRoot();
 
@@ -73,185 +84,30 @@ public class MicrophoneFragment extends Fragment {
         binding.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RecordAudio.startRecording();
-            }
-        });
-
-        /*binding.button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (audioRecorder != null) {
-                    audioRecorder.stop();
-                    audioRecorder.release();
-                    audioRecorder = null;
-                }
-            }
-        });*/
-
-        binding.button3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AudioTrack audioTrack = new AudioTrack(
-                        AudioManager.STREAM_MUSIC,       // Поток для музыки
-                        44100,                      // Частота дискретизации (та же, что и при записи)
-                        AudioFormat.CHANNEL_OUT_MONO,    // Моно
-                        AudioFormat.ENCODING_PCM_16BIT,  // Формат PCM 16-бит
-                        RecordAudio.getBufferSize(),                      // Размер буфера (тот же, что и при записи)
-                        AudioTrack.MODE_STREAM);         // Используем потоковый режим
-
-// Воспроизведение данных
-                File audioFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_MUSIC), "audio.pcm");
-                try {
-                    FileInputStream fis = new FileInputStream(audioFile);
-
-// Буфер для чтения данных из файла
-                    byte[] audioBuffer = new byte[RecordAudio.getBufferSize()];
-
-// Стартуем воспроизведение
-                    audioTrack.play();
-
-// Чтение и воспроизведение аудиоданных
-                    int bytesRead;
-                    while ((bytesRead = fis.read(audioBuffer)) != -1) {
-                        audioTrack.write(audioBuffer, 0, bytesRead);
-                    }
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-
-// Остановка и освобождение ресурсов
-                audioTrack.stop();
-                audioTrack.release();
-            }
-        });
-
-        binding.button4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mediaPlayer != null) {
-                    mediaPlayer.stop();
-                    mediaPlayer.release();
-                    Toast.makeText(getActivity(), "Playing stopped", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /*
-        binding.button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (checkPermissions()) {
-                    try {
-                        File[] directories = context.getExternalFilesDirs(Environment.DIRECTORY_MUSIC);
-                        if (directories == null || directories.length == 0 || directories[0] == null)
-                            throw new IOException("Directory not found");
-                        AudioSavePath = directories[0].getAbsolutePath() + "/audio.3gp";
-
-                        mediaRecorder = new MediaRecorder();
-                        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-                        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-                        mediaRecorder.setOutputFile(AudioSavePath);
-                        mediaRecorder.prepare();
-                        mediaRecorder.start();
-                        Toast.makeText(context, "Recording started", Toast.LENGTH_SHORT).show();
-
-                    } catch (IOException e) {
-                        Toast.makeText(context, "Recording failed", Toast.LENGTH_SHORT).show();
-                        if ((e + "").equals("java.io.IOException: Directory not found"))
-                            Toast.makeText(context, "Directory not found", Toast.LENGTH_SHORT).show();
-                        else
-                            Toast.makeText(context, e + "", Toast.LENGTH_SHORT).show();
-                        Log.e("Error recording", e + "");
-                    }
-
-
-                } else {
-                    Activity activity = getActivity();
-                    assert activity != null;
-                    ActivityCompat.requestPermissions(activity, new String[]{
-                            Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    }, 1);
-                }
+                startRecording();
             }
         });
 
         binding.button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mediaRecorder != null) {
-                    mediaRecorder.stop();
-                    mediaRecorder.release();
-                    Toast.makeText(getActivity(), "Recording stopped", Toast.LENGTH_SHORT).show();
-                }
+                stopRecording();
             }
         });
 
         binding.button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    mediaPlayer = new MediaPlayer();
-                    mediaPlayer.setDataSource(AudioSavePath);
-                    mediaPlayer.prepare();
-                    mediaPlayer.start();
-                    Toast.makeText(context, "Playing started", Toast.LENGTH_SHORT).show();
-                } catch (IOException e) {
-                    Toast.makeText(context, "Playing failed", Toast.LENGTH_SHORT).show();
-                    Toast.makeText(context, e + "", Toast.LENGTH_SHORT).show();
-                    Log.e("Error playing", e + "");
-                }
+                playRecording();
             }
         });
 
         binding.button4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mediaPlayer != null) {
-                    mediaPlayer.stop();
-                    mediaPlayer.release();
-                    Toast.makeText(getActivity(), "Playing stopped", Toast.LENGTH_SHORT).show();
-                }
+                stopPlayback();
             }
         });
-
-         */
     }
 
     @Override
@@ -266,70 +122,64 @@ public class MicrophoneFragment extends Fragment {
         return permission == PackageManager.PERMISSION_GRANTED;
     }
 
-    private static class RecordAudio {
-        private static boolean isRecording = false;
-        private static boolean isPaused = false;
-        private static AudioRecord audioRecorder = null;
+    // Функции для записи и воспроизведения аудио
+    private void startRecording() {
+        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE);
 
-        public static int getBufferSize() {
-            return bufferSize;
-        }
+        audioOutputStream = new ByteArrayOutputStream(); // Сбросим предыдущие данные
 
-        private static int bufferSize;
-        private static String audioSavePath;
-        public static void setAudioSavePath(String audioSavePathTmp) {
-            audioSavePath = audioSavePathTmp;
-        }
+        audioRecord.startRecording();
+        isRecording = true;
 
-        public static void startRecording() {
-            if (!isRecording && audioRecorder == null) {
-                int sampleRate = 44100;
-                int channelConfig = AudioFormat.CHANNEL_IN_MONO;
-                int audioFormat = AudioFormat.ENCODING_PCM_16BIT;
-
-                int bufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
-
-                @SuppressLint("MissingPermission")
-                AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
-                        sampleRate, channelConfig, audioFormat, bufferSize);
-
-                short[] audioData = new short[bufferSize];
-                FileOutputStream outputStream;
-                try {
-                    outputStream = new FileOutputStream(audioSavePath);
-                    audioRecord.startRecording();
-                    for (int i = 0; i < sampleRate * 5 / bufferSize; i++) {
-                        int read = audioRecord.read(audioData, 0, bufferSize);
-                        if (read > 0) {
-                            byte[] audioBytes = new byte[read * 2]; // Каждое значение short занимает 2 байта
-                            for (int j = 0; j < read; j++) {
-                                audioBytes[j * 2] = (byte) (audioData[j] & 0x00FF);
-                                audioBytes[j * 2 + 1] = (byte) ((audioData[j] >> 8) & 0xFF);
-                            }
-                            outputStream.write(audioBytes); // Запись данных в файл
-                        }
+        // Запись в отдельном потоке
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                byte[] buffer = new byte[BUFFER_SIZE];
+                while (isRecording) {
+                    int bytesRead = audioRecord.read(buffer, 0, buffer.length);
+                    if (bytesRead > 0) {
+                        // Сохраняем данные в ByteArrayOutputStream
+                        audioOutputStream.write(buffer, 0, bytesRead);
                     }
-                } catch(IOException e) {
-                    e.printStackTrace();
                 }
-
             }
-            //bufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        }).start();
+    }
 
-            //audioRecorder = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100,
-                   // AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
+    // Остановка записи
+    private void stopRecording() {
+        if (audioRecord != null) {
+            isRecording = false;
+            audioRecord.stop();
+            audioRecord.release();
+            audioRecord = null;
+        }
+    }
 
-            //audioRecorder.startRecording();
-            /*new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    short[] audioBuffer = new short[bufferSize];
-                    while (audioRecorder.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
-                        audioRecorder.read(audioBuffer, 0, audioBuffer.length);
-                        // Здесь можно добавить код для анализа аудиопотока
-                    }
-                }
-            }).start();*/
+    // Воспроизведение записи
+    private void playRecording() {
+        if (audioOutputStream != null && audioOutputStream.size() > 0) {
+            final byte[] audioData = audioOutputStream.toByteArray(); // Получаем записанные данные
+
+            audioTrack = new AudioTrack(android.media.AudioManager.STREAM_MUSIC, SAMPLE_RATE,
+                    AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, audioData.length,
+                    AudioTrack.MODE_STATIC);
+
+            audioTrack.write(audioData, 0, audioData.length);
+            audioTrack.play();
+            isPlaying = true;
+        }
+    }
+
+    // Остановка воспроизведения
+    private void stopPlayback() {
+        if (audioTrack != null) {
+            isPlaying = false;
+            audioTrack.stop();
+            audioTrack.release();
+            audioTrack = null;
         }
     }
 }
