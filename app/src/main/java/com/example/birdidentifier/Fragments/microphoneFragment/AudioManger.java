@@ -1,5 +1,6 @@
 package com.example.birdidentifier.Fragments.microphoneFragment;
 
+import android.annotation.SuppressLint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
@@ -7,17 +8,14 @@ import android.media.MediaRecorder;
 
 import java.io.ByteArrayOutputStream;
 
-public class AudioManger {
+class AudioManger {
     private static final int SAMPLE_RATE;
     private static final int BUFFER_SIZE;
     private static ByteArrayOutputStream audioOutputStream;
-
     private static AudioRecord audioRecord;
     private static AudioTrack audioTrack;
     private static boolean isRecording;
     private static boolean isPlaying;
-
-
 
 
     static {
@@ -31,10 +29,10 @@ public class AudioManger {
         isPlaying = false;
     }
 
+    @SuppressLint("MissingPermission")
     protected static void startRecording() {
         audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, BUFFER_SIZE);
-
 
         audioRecord.startRecording();
         isRecording = true;
@@ -63,7 +61,8 @@ public class AudioManger {
     }
 
     protected static void playRecording() {
-        if (audioOutputStream != null && audioOutputStream.size() > 0) {
+        if (audioOutputStream != null && audioOutputStream.size() > 0 && !isPlaying) {
+            isPlaying = true;
             final byte[] audioData = audioOutputStream.toByteArray();
 
             audioTrack = new AudioTrack(android.media.AudioManager.STREAM_MUSIC, SAMPLE_RATE,
@@ -72,7 +71,16 @@ public class AudioManger {
 
             audioTrack.write(audioData, 0, audioData.length);
             audioTrack.play();
-            isPlaying = true;
+
+            audioTrack.setNotificationMarkerPosition(audioData.length / 2);
+            audioTrack.setPlaybackPositionUpdateListener(new AudioTrack.OnPlaybackPositionUpdateListener() {
+                @Override
+                public void onMarkerReached(AudioTrack track) {
+                    stopPlayback();
+                }
+                @Override
+                public void onPeriodicNotification(AudioTrack track) {}
+            });
         }
     }
 

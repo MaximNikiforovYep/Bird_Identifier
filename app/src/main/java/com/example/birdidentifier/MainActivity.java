@@ -19,7 +19,6 @@ import com.example.birdidentifier.adapters.ViewPagerAdapter;
 import com.example.birdidentifier.databinding.ActivityMainBinding;
 
 public class MainActivity extends FragmentActivity {
-    private static final int REQUEST_PERMISSIONS = 100;
     private ActivityMainBinding binding;
     private ViewPager2 viewPager;
     private ViewPagerAdapter viewPagerAdapter;
@@ -29,8 +28,6 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_PERMISSIONS);
 
         viewPager = findViewById(R.id.viewPager);
         viewPagerAdapter = new ViewPagerAdapter(this);

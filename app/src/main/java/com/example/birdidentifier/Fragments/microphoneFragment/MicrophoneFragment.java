@@ -35,7 +35,14 @@ public class MicrophoneFragment extends Fragment {
         binding.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AudioManger.startRecording();
+                if (checkPermission()) {
+                    AudioManger.startRecording();
+                } else {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 0);
+                    if (checkPermission()) {
+                        AudioManger.startRecording();
+                    }
+                }
             }
         });
 
@@ -67,8 +74,7 @@ public class MicrophoneFragment extends Fragment {
         binding = null;
     }
 
-
-    private boolean checkPermissions() {
+    private boolean checkPermission() {
         int permission = ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO);
         return permission == PackageManager.PERMISSION_GRANTED;
     }
