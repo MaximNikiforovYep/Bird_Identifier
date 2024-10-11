@@ -1,4 +1,4 @@
-package com.example.birdidentifier;
+package com.example.birdidentifier.Fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,17 +8,16 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
 
-import com.example.birdidentifier.databinding.FragmentCameraBinding;
+import com.example.birdidentifier.databinding.FragmentMainBinding;
 
-public class CameraFragment extends Fragment {
-    private FragmentCameraBinding binding;
+public class MainFragment extends Fragment {
+    private FragmentMainBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentCameraBinding.inflate(inflater, container, false);
+        binding = FragmentMainBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -26,6 +25,7 @@ public class CameraFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
     }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
