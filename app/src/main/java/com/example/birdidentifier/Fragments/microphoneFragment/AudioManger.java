@@ -5,6 +5,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 
@@ -43,6 +44,8 @@ class AudioManger {
                 byte[] buffer = new byte[BUFFER_SIZE];
                 while (isRecording) {
                     int bytesRead = audioRecord.read(buffer, 0, BUFFER_SIZE);
+                    Log.i("AudioManger", "bytesRead: " + bytesRead);
+                    Log.i("AudioManger", "buffer size: " + BUFFER_SIZE);
                     if (bytesRead > 0) {
                         audioOutputStream.write(buffer, 0, bytesRead);
                     }
