@@ -9,7 +9,7 @@ import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 
-class AudioManger {
+class AudioManager {
     private static final int SAMPLE_RATE;
     private static final int BUFFER_SIZE;
     private static ByteArrayOutputStream audioOutputStream;

@@ -36,11 +36,11 @@ public class MicrophoneFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (checkPermission()) {
-                    AudioManger.startRecording();
+                    AudioManager.startRecording();
                 } else {
                     ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 0);
                     if (checkPermission()) {
-                        AudioManger.startRecording();
+                        AudioManager.startRecording();
                     }
                 }
             }
@@ -49,21 +49,21 @@ public class MicrophoneFragment extends Fragment {
         binding.button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AudioManger.stopRecording();
+                AudioManager.stopRecording();
             }
         });
 
         binding.button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AudioManger.playRecording();
+                AudioManager.playRecording();
             }
         });
 
         binding.button4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AudioManger.stopPlayback();
+                AudioManager.stopPlayback();
             }
         });
     }
