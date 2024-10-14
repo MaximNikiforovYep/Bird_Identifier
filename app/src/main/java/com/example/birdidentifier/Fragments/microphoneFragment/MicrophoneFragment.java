@@ -20,6 +20,7 @@ public class MicrophoneFragment extends Fragment {
     private FragmentMicrophoneBinding binding;
     private Context context;
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
