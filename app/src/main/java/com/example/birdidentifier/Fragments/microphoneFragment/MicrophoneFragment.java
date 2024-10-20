@@ -19,12 +19,13 @@ import com.example.birdidentifier.databinding.FragmentMicrophoneBinding;
 public class MicrophoneFragment extends Fragment {
     private FragmentMicrophoneBinding binding;
     private Context context;
-
+    SpectrogramView spectrogramView;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentMicrophoneBinding.inflate(inflater, container, false);
+        spectrogramView = binding.spectrogramView;
         context = getActivity();
         assert context != null;
         return binding.getRoot();
@@ -37,11 +38,11 @@ public class MicrophoneFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (checkPermission()) {
-                    AudioManager.startRecording();
+                    AudioManager.startRecording(context, spectrogramView);
                 } else {
                     ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO}, 0);
                     if (checkPermission()) {
-                        AudioManager.startRecording();
+                        AudioManager.startRecording(context, spectrogramView);
                     }
                 }
             }

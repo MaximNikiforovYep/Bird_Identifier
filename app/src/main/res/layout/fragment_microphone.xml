@@ -4,7 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.microphoneFragment.MicrophoneFragment">
+    tools:context=".Fragments.microphoneFragment.MicrophoneFragment"
+    android:background="@color/white" >
+
+    <com.example.birdidentifier.Fragments.microphoneFragment.SpectrogramView
+        android:id="@+id/spectrogramView"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <Button
         android:id="@+id/button"
