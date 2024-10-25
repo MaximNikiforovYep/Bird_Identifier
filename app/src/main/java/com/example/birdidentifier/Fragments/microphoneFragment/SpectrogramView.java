@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-SurfaceView
+
 public class SpectrogramView extends View {
     private final List<double[]> fftData;
     private final Paint paint;
