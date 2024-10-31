@@ -1,11 +1,13 @@
 package com.example.birdidentifier.Fragments.microphoneFragment;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
@@ -19,15 +21,18 @@ import java.util.List;
 public class SpectrogramView extends View {
     private final List<double[]> fftData;
     private final Paint paint;
-
+    Bitmap bitmap;
+    private Canvas canvas;
     private final int MAX_AMPLITUDES = 500;
     private int amplitudeWidth;
+    int indicator = 0;
     private final int amplitudeHeight = 882;
 
     public SpectrogramView(Context context) {
         super(context);
         paint = new Paint();
         fftData = new ArrayList<>();
+
     }
 
     public SpectrogramView(Context context, AttributeSet attrs) {
@@ -41,6 +46,7 @@ public class SpectrogramView extends View {
             data[i] = (data[i]>2.5? 250f: data[i] * 100);
         }*/
         fftData.add(data);
+        drawFFTDataOnBitmap();
         invalidate();
     }
 
@@ -48,30 +54,7 @@ public class SpectrogramView extends View {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
-        int width = getWidth();
-        int height = getHeight();
-        amplitudeWidth = width / MAX_AMPLITUDES;
-
-        int fftDataLength = fftData.size();
-
-        for (int i = 0; i < fftDataLength; ++i) {
-            double[] data = fftData.get(i);
-            for (int j = 0; j < data.length; ++j) {
-                int color = Color.rgb((int) data[j], 1, 1);
-                paint.setColor(color);
-                if(i <= width) {
-                    int left = i * amplitudeWidth;
-                    int top = (int) ((1.0 - (j / (double) amplitudeHeight)) * height);
-                    int right = left + amplitudeWidth;
-                    int bottom = (int) ((1.0 - ((j + 1) / (double) amplitudeHeight)) * height);
-                    canvas.drawRect(left, top, right, bottom, paint);
-                    //canvas.drawLine((float) width / 100f * i, (float) j * height / (float) data.length, (float) width / 100f * i, ((float) j + 1f) * height / (float) data.length, paint);
-                } else {
-                    //canvas.drawLine(width, (float) j * height / (float) data.length, width, ((float) j + 1f) * height / (float) data.length, paint);
-                }
-
-            }
-        }
+        canvas.drawBitmap(bitmap, indicator, 0, paint);
 
         /*paint.setStrokeWidth(5);
 
@@ -91,4 +74,24 @@ public class SpectrogramView extends View {
             canvas.drawRect(i * barWidth, (float) (height - barHeight), (i + 1) * barWidth, height, paint);
         }*/
     }
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        bitmap = Bitmap.createBitmap(getWidth(), amplitudeHeight, Bitmap.Config.ARGB_8888);
+        canvas = new Canvas(bitmap);
+        bitmap.eraseColor(Color.BLACK); // Очищаем bitmap для новой отрисовки
+    }
+
+    private void drawFFTDataOnBitmap() {
+        int fftDataLength = fftData.size();
+        indicator = getWidth() - fftDataLength;
+        for (int i = fftDataLength - 1; i < fftDataLength; ++i) {
+            double[] data = fftData.get(i);
+            for (int j = 0; j < 882; ++j) {
+                int color = Color.rgb((int) data[j], 1, 1);
+                paint.setColor(color);
+                bitmap.setPixel(i, 882-j-1, color);
+            }
+        }
+    }
+
 }
